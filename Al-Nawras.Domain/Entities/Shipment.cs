@@ -38,7 +38,9 @@ namespace Al_Nawras.Domain.Entities
             DealId = dealId;
             ShipmentNumber = $"SH-{DateTime.UtcNow:yyyyMM}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
             Status = ShipmentStatus.Pending;
+            TrackingNumber = string.Empty;
             Carrier = carrier;
+            VesselName = string.Empty;
             PortOfLoading = portOfLoading;
             PortOfDischarge = portOfDischarge;
             ETD = etd;
@@ -51,6 +53,18 @@ namespace Al_Nawras.Domain.Entities
         {
             Status = newStatus;
             UpdatedAt = DateTime.UtcNow;
+            if (newStatus == ShipmentStatus.InTransit) ActualDeparture = DateTime.UtcNow;
+            if (newStatus == ShipmentStatus.Delivered) ActualArrival = DateTime.UtcNow;
+        }
+        public void UpdateStatus(ShipmentStatus newStatus, string? trackingNumber = null)
+        {
+            Status = newStatus;
+
+            if (!string.IsNullOrWhiteSpace(trackingNumber))
+                TrackingNumber = trackingNumber;
+
+            UpdatedAt = DateTime.UtcNow;
+
             if (newStatus == ShipmentStatus.InTransit) ActualDeparture = DateTime.UtcNow;
             if (newStatus == ShipmentStatus.Delivered) ActualArrival = DateTime.UtcNow;
         }

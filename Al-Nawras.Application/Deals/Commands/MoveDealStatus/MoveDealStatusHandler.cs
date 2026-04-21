@@ -13,15 +13,18 @@ namespace Al_Nawras.Application.Deals.Commands.MoveDealStatus
 {
     public class MoveDealStatusHandler
     {
+        private readonly IApplicationDbContext _dbContext;
         private readonly IDealRepository _dealRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public MoveDealStatusHandler(
+            IApplicationDbContext dbContext,
             IDealRepository dealRepository,
             INotificationRepository notificationRepository,
             IUnitOfWork unitOfWork)
         {
+            _dbContext = dbContext;
             _dealRepository = dealRepository;
             _notificationRepository = notificationRepository;
             _unitOfWork = unitOfWork;
@@ -36,17 +39,20 @@ namespace Al_Nawras.Application.Deals.Commands.MoveDealStatus
             if (deal is null)
                 return Result.Failure($"Deal {command.DealId} not found.");
 
+            DealStatusHistory historyEntry;
             try
             {
                 // Domain enforces the transition rules — throws if invalid
-                deal.MoveToStatus(command.NewStatus, command.ChangedByUserId, command.Notes);
+                historyEntry = deal.MoveToStatus(command.NewStatus, command.ChangedByUserId, command.Notes);
             }
             catch (InvalidOperationException ex)
             {
                 return Result.Failure(ex.Message);
             }
 
-            _dealRepository.Update(deal);
+            // Explicitly register the new history record so EF inserts it as Added
+            // instead of inferring the wrong state from aggregate graph discovery.
+            await _dbContext.DealStatusHistory.AddAsync(historyEntry, cancellationToken);
 
             // Notify assigned user of the status change
             var notification = new Notification(

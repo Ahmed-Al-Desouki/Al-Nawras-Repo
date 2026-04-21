@@ -1,21 +1,27 @@
-﻿using Al_Nawras.Application.Auth.Commands.Login;
+﻿using Al_Nawras.Application.Auth.Commands.GoogleLogin;
+using Al_Nawras.Application.Auth.Commands.Login;
+using Al_Nawras.Application.Auth.Commands.Register;
 using Al_Nawras.Application.Auth.Interfaces;
 using Al_Nawras.Application.Clients.Commands.CreateClient;
 using Al_Nawras.Application.Common.Interfaces;
 using Al_Nawras.Application.Common.Interfaces.Repositories;
+using Al_Nawras.Application.Dashboard.Queries.GetDashboard;
 using Al_Nawras.Application.Deals.Commands.CreateDeal;
 using Al_Nawras.Application.Deals.Commands.MoveDealStatus;
 using Al_Nawras.Application.Deals.Queries.GetDealById;
 using Al_Nawras.Application.Deals.Queries.GetDeals;
+using Al_Nawras.Application.Documents.Commands.UploadDocument;
+using Al_Nawras.Application.Payments.Commands.CreatePayment;
+using Al_Nawras.Application.Payments.Commands.MarkPaymentPaid;
+using Al_Nawras.Application.Shipments.Commands.CreateShipment;
+using Al_Nawras.Application.Shipments.Commands.UpdateShipmentStatus;
+using Al_Nawras.Infrastructure.Extensions;
 using Al_Nawras.Infrastructure.Persistence;
+using Al_Nawras.Infrastructure.Persistence.Repositories;
+using Al_Nawras.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Al_Nawras.Infrastructure
 {
@@ -28,8 +34,10 @@ namespace Al_Nawras.Infrastructure
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(
                     configuration.GetConnectionString("DefaultConnection"),
-                    b => b.MigrationsAssembly("ImportExport.Infrastructure")
+                    b => b.MigrationsAssembly("Al-Nawras.Infrastructure")
                 ));
+
+            services.AddJwtAuthentication(configuration);
 
             // DbContext as both interfaces
             services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<AppDbContext>());
@@ -47,6 +55,10 @@ namespace Al_Nawras.Infrastructure
             // Services
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+            services.AddScoped<RegisterHandler>();
+            services.AddScoped<GoogleLoginHandler>();
+            services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
             // Handlers
             services.AddScoped<LoginHandler>();
@@ -55,6 +67,12 @@ namespace Al_Nawras.Infrastructure
             services.AddScoped<GetDealByIdHandler>();
             services.AddScoped<GetDealsHandler>();
             services.AddScoped<CreateClientHandler>();
+            services.AddScoped<CreateShipmentHandler>();
+            services.AddScoped<UpdateShipmentStatusHandler>();
+            services.AddScoped<CreatePaymentHandler>();
+            services.AddScoped<MarkPaymentPaidHandler>();
+            services.AddScoped<UploadDocumentHandler>();
+            services.AddScoped<GetDashboardHandler>();
 
             return services;
         }

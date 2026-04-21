@@ -44,15 +44,15 @@ namespace Al_Nawras.Domain.Entities
 
         // Valid transition map — business rule lives in the domain
         private static readonly Dictionary<DealStatus, DealStatus[]> AllowedTransitions = new()
-    {
-        { DealStatus.Lead,        new[] { DealStatus.Negotiation } },
-        { DealStatus.Negotiation, new[] { DealStatus.Confirmed, DealStatus.Lead } },
-        { DealStatus.Confirmed,   new[] { DealStatus.Shipping } },
-        { DealStatus.Shipping,    new[] { DealStatus.Customs } },
-        { DealStatus.Customs,     new[] { DealStatus.Delivered } },
-        { DealStatus.Delivered,   new[] { DealStatus.Closed } },
-        { DealStatus.Closed,      Array.Empty<DealStatus>() }
-    };
+        {
+            { DealStatus.Lead,        new[] { DealStatus.Negotiation } },
+            { DealStatus.Negotiation, new[] { DealStatus.Confirmed, DealStatus.Lead } },
+            { DealStatus.Confirmed,   new[] { DealStatus.Shipping } },
+            { DealStatus.Shipping,    new[] { DealStatus.Customs } },
+            { DealStatus.Customs,     new[] { DealStatus.Delivered } },
+            { DealStatus.Delivered,   new[] { DealStatus.Closed } },
+            { DealStatus.Closed,      Array.Empty<DealStatus>() }
+        };
 
         private Deal() { }  // required by EF Core
 
@@ -74,19 +74,22 @@ namespace Al_Nawras.Domain.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public void MoveToStatus(DealStatus newStatus, int changedByUserId, string notes = null)
+        public DealStatusHistory MoveToStatus(DealStatus newStatus, int changedByUserId, string notes = null)
         {
             if (!AllowedTransitions.TryGetValue(Status, out var allowed) || !allowed.Contains(newStatus))
                 throw new InvalidOperationException(
                     $"Transition from {Status} to {newStatus} is not allowed.");
 
-            _statusHistory.Add(new DealStatusHistory(Id, Status, newStatus, changedByUserId, notes));
+            var historyEntry = new DealStatusHistory(Id, Status, newStatus, changedByUserId, notes);
+            _statusHistory.Add(historyEntry);
 
             Status = newStatus;
             UpdatedAt = DateTime.UtcNow;
 
             if (newStatus == DealStatus.Confirmed) ConfirmedAt = DateTime.UtcNow;
             if (newStatus == DealStatus.Closed) ClosedAt = DateTime.UtcNow;
+
+            return historyEntry;
         }
 
         private static string GenerateDealNumber()

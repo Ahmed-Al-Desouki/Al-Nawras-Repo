@@ -33,6 +33,29 @@ namespace Al_Nawras.Infrastructure.Persistence.Configurations
                    .HasForeignKey(u => u.ClientId)
                    .OnDelete(DeleteBehavior.SetNull)
                    .IsRequired(false);
+
+            builder.Property(u => u.PasswordHash).IsRequired(false).HasMaxLength(500);
+            builder.Property(u => u.GoogleId).HasMaxLength(100).IsRequired(false);
+            builder.Property(u => u.ProfilePictureUrl).HasMaxLength(500).IsRequired(false);
+            builder.HasIndex(u => u.GoogleId)
+                   .HasFilter("[GoogleId] IS NOT NULL")
+                   .IsUnique();
+
+
+            builder.HasData(new
+            {
+                Id = 1,
+                Email = "admin@importexport.com",
+                PasswordHash = "$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.",
+                FirstName = "System",
+                LastName = "Admin",
+                RoleId = 1,
+                ClientId = (Guid?)null,
+                IsActive = true,
+                LastLoginAt = (DateTime?)null,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                UpdatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            });
         }
     }
 }
