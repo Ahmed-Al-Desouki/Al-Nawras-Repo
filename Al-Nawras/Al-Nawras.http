@@ -1,0 +1,6 @@
+@Al_Nawras_HostAddress = http://localhost:5264
+
+GET {{Al_Nawras_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
