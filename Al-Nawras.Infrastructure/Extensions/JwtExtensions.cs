@@ -58,6 +58,19 @@ namespace Al_Nawras.Infrastructure.Extensions
                             context.Response.ContentType = "application/json";
                             return context.Response.WriteAsync(
                                 "{\"error\": \"Forbidden. You do not have access to this resource.\"}");
+                        },
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+
+                            if (!string.IsNullOrWhiteSpace(accessToken)
+                                && path.StartsWithSegments("/hubs/workflow"))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
                         }
                     };
                 });

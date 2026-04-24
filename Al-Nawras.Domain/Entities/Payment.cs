@@ -61,5 +61,19 @@ namespace Al_Nawras.Domain.Entities
                 UpdatedAt = DateTime.UtcNow;
             }
         }
+
+        /// <summary>Internal — used by seeder to create payments with a specific status.</summary>
+        internal void ForceStatus(PaymentStatus status, DateTime? paidAt)
+        {
+            // MarkAsPaid / MarkAsOverdue already exist — this just allows direct override
+            if (status == PaymentStatus.FullyPaid && paidAt.HasValue)
+            {
+                MarkAsPaid();
+            }
+            else if (status == PaymentStatus.Overdue)
+            {
+                MarkAsOverdue();
+            }
+        }
     }
 }

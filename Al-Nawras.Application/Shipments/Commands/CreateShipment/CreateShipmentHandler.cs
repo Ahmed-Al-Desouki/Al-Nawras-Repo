@@ -1,13 +1,9 @@
-﻿using Al_Nawras.Application.Common.Interfaces;
+using Al_Nawras.Application.Common.Interfaces;
 using Al_Nawras.Application.Common.Interfaces.Repositories;
 using Al_Nawras.Application.Common.Models;
+using Al_Nawras.Application.Common.Notifications;
 using Al_Nawras.Domain.Entities;
 using Al_Nawras.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Al_Nawras.Application.Shipments.Commands.CreateShipment
 {
@@ -15,18 +11,18 @@ namespace Al_Nawras.Application.Shipments.Commands.CreateShipment
     {
         private readonly IShipmentRepository _shipmentRepository;
         private readonly IDealRepository _dealRepository;
-        private readonly INotificationRepository _notificationRepository;
+        private readonly INotificationDispatcher _notificationDispatcher;
         private readonly IUnitOfWork _unitOfWork;
 
         public CreateShipmentHandler(
             IShipmentRepository shipmentRepository,
             IDealRepository dealRepository,
-            INotificationRepository notificationRepository,
+            INotificationDispatcher notificationDispatcher,
             IUnitOfWork unitOfWork)
         {
             _shipmentRepository = shipmentRepository;
             _dealRepository = dealRepository;
-            _notificationRepository = notificationRepository;
+            _notificationDispatcher = notificationDispatcher;
             _unitOfWork = unitOfWork;
         }
 
@@ -39,7 +35,6 @@ namespace Al_Nawras.Application.Shipments.Commands.CreateShipment
             if (deal is null)
                 return Result<Guid>.Failure($"Deal {command.DealId} not found.");
 
-            // Shipments can only be created for confirmed or active deals
             if (deal.Status < DealStatus.Confirmed)
                 return Result<Guid>.Failure(
                     $"Cannot create a shipment for a deal in status '{deal.Status}'. " +
@@ -58,19 +53,19 @@ namespace Al_Nawras.Application.Shipments.Commands.CreateShipment
             );
 
             await _shipmentRepository.AddAsync(shipment, cancellationToken);
-
-            // Notify the assigned sales user
-            var notification = new Notification(
-                userId: deal.AssignedSalesUserId,
-                type: NotificationType.DealStatusChanged,
-                title: "Shipment created",
-                body: $"Shipment {shipment.ShipmentNumber} has been created for deal {deal.DealNumber}.",
-                relatedEntityId: deal.Id,
-                relatedEntityType: "Deal"
-            );
-
-            await _notificationRepository.AddAsync(notification, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            await _notificationDispatcher.DispatchAsync(
+                new WorkflowNotificationRequest(
+                    Type: NotificationType.DealStatusChanged,
+                    Title: "Shipment created",
+                    Body: $"Shipment {shipment.ShipmentNumber} has been created for deal {deal.DealNumber}.",
+                    RelatedEntityId: shipment.Id,
+                    RelatedEntityType: nameof(Shipment),
+                    UserIds: [deal.AssignedSalesUserId],
+                    RoleNames: ["operations", "sales", "admin"],
+                    ClientId: deal.ClientId),
+                cancellationToken);
 
             return Result<Guid>.Success(shipment.Id);
         }

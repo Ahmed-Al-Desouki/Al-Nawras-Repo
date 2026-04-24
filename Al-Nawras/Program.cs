@@ -1,5 +1,7 @@
-using Al_Nawras.Infrastructure;
+﻿using Al_Nawras.Infrastructure;
+using Al_Nawras.Infrastructure.Notifications;
 using Al_Nawras.Infrastructure.Persistence;
+using Al_Nawras.Infrastructure.Persistence.Seeders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -9,7 +11,7 @@ namespace Al_Nawras
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +43,20 @@ namespace Al_Nawras
 
             var app = builder.Build();
 
+            // ── Auto-migrate and seed on startup ────────────────────────────────────────
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var logger = scope.ServiceProvider
+                    .GetRequiredService<ILogger<Program>>();
+
+                // Apply any pending migrations automatically
+                await db.Database.MigrateAsync();
+
+                // Seed realistic test data
+                await DataSeeder.SeedAsync(db, logger);
+            }
+
             app.UseSwagger();
             app.UseSwaggerUI();
 
@@ -48,6 +64,7 @@ namespace Al_Nawras
             app.UseAuthorization();
 
             app.MapControllers();
+            app.MapHub<WorkflowHub>("/hubs/workflow");
             app.Run();
         }
     }

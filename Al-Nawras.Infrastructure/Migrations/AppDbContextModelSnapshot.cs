@@ -68,7 +68,7 @@ namespace Al_Nawras.Infrastructure.Migrations
 
                     b.HasIndex("TableName", "RecordId", "CreatedAt");
 
-                    b.ToTable("AuditLogs");
+                    b.ToTable("AuditLogs", (string)null);
                 });
 
             modelBuilder.Entity("Al_Nawras.Domain.Entities.Client", b =>

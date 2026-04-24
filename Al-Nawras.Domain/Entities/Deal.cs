@@ -94,5 +94,17 @@ namespace Al_Nawras.Domain.Entities
 
         private static string GenerateDealNumber()
             => $"DL-{DateTime.UtcNow:yyyyMM}-{Guid.NewGuid().ToString()[..6].ToUpper()}";
+
+        /// <summary>Used by seeder only — sets CreatedAt to a historical date.</summary>
+        internal void SetCreatedAt(DateTime createdAt)
+        {
+            CreatedAt = createdAt;
+            UpdatedAt = createdAt;
+        }
+
+        internal void SetUpdatedAt(DateTime updatedAt)
+        {
+            UpdatedAt = updatedAt;
+        }
     }
 }
