@@ -26,6 +26,8 @@ namespace Al_Nawras.Infrastructure.Persistence
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<CurrencyRate> CurrencyRates => Set<CurrencyRate>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+        public DbSet<ReportTemplate> ReportTemplates => Set<ReportTemplate>();
+        public DbSet<ReportImport> ReportImports => Set<ReportImport>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

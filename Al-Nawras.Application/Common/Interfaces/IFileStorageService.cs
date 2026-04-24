@@ -15,6 +15,10 @@ namespace Al_Nawras.Application.Common.Interfaces
             string folder,
             CancellationToken cancellationToken = default);
 
+        Task<Stream?> OpenReadAsync(
+            string storagePath,
+            CancellationToken cancellationToken = default);
+
         void Delete(string storagePath);
     }
 }

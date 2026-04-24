@@ -23,6 +23,8 @@ namespace Al_Nawras.Application.Common.Interfaces
         DbSet<Notification> Notifications { get; }
         DbSet<CurrencyRate> CurrencyRates { get; }
         DbSet<AuditLog> AuditLogs { get; }
+        DbSet<ReportTemplate> ReportTemplates { get; }
+        DbSet<ReportImport> ReportImports { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }

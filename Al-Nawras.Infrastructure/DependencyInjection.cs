@@ -24,6 +24,16 @@ using Al_Nawras.Application.Payments.Commands.MarkPaymentPaid;
 using Al_Nawras.Application.Reports.Queries.ExportReport;
 using Al_Nawras.Application.Reports.Queries.GetEmployeePerformance;
 using Al_Nawras.Application.Reports.Queries.GetRevenueByPeriod;
+using Al_Nawras.Application.Reporting.Commands.CreateReportTemplate;
+using Al_Nawras.Application.Reporting.Commands.ReviewReportImport;
+using Al_Nawras.Application.Reporting.Commands.UploadReportImport;
+using Al_Nawras.Application.Reporting.Queries.DownloadReportImportSourceFile;
+using Al_Nawras.Application.Reporting.Queries.DownloadReportTemplate;
+using Al_Nawras.Application.Reporting.Queries.GetReportImportById;
+using Al_Nawras.Application.Reporting.Queries.GetReportImports;
+using Al_Nawras.Application.Reporting.Queries.GetReportTemplateById;
+using Al_Nawras.Application.Reporting.Queries.GetReportTemplates;
+using Al_Nawras.Application.Reporting.Queries.GetReportingOverview;
 using Al_Nawras.Application.Shipments.Commands.CreateShipment;
 using Al_Nawras.Application.Shipments.Commands.UpdateShipmentStatus;
 using Al_Nawras.Infrastructure.BackgroundJobs;
@@ -94,6 +104,7 @@ namespace Al_Nawras.Infrastructure
             services.AddScoped<AuditInterceptor>();
             services.AddScoped<IOverduePaymentJob, OverduePaymentJob>();
             services.AddScoped<IExcelExportService, ExcelExportService>();
+            services.AddScoped<IReportingWorkbookService, ReportingWorkbookService>();
             services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
             services.AddScoped<IEmailSender, SmtpEmailSender>();
             services.AddSingleton<IRealtimeNotifier, SignalRRealtimeNotifier>();
@@ -120,6 +131,16 @@ namespace Al_Nawras.Infrastructure
             services.AddScoped<GetRevenueByPeriodHandler>();
             services.AddScoped<GetEmployeePerformanceHandler>();
             services.AddScoped<ExportReportHandler>();
+            services.AddScoped<GetReportTemplatesHandler>();
+            services.AddScoped<GetReportTemplateByIdHandler>();
+            services.AddScoped<CreateReportTemplateHandler>();
+            services.AddScoped<ReviewReportImportHandler>();
+            services.AddScoped<DownloadReportImportSourceFileHandler>();
+            services.AddScoped<DownloadReportTemplateHandler>();
+            services.AddScoped<UploadReportImportHandler>();
+            services.AddScoped<GetReportImportsHandler>();
+            services.AddScoped<GetReportImportByIdHandler>();
+            services.AddScoped<GetReportingOverviewHandler>();
 
             return services;
         }

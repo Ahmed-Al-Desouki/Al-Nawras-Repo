@@ -119,11 +119,11 @@ namespace Al_Nawras.Infrastructure.Persistence.Interceptors
 
             var recordId = GetPrimaryKey(entry);
             var oldValues = action == AuditAction.Create
-                ? null
+                ? "{}"
                 : SerializeValues(entry.OriginalValues, entry);
 
             var newValues = action == AuditAction.Delete
-                ? null
+                ? "{}"
                 : SerializeValues(entry.CurrentValues, entry);
 
             // For updates, skip if nothing meaningful actually changed
@@ -135,8 +135,8 @@ namespace Al_Nawras.Infrastructure.Persistence.Interceptors
                 recordId: recordId,
                 action: action.Value,
                 performedByUserId: userId,
-                oldValues: oldValues,
-                newValues: newValues,
+                oldValues: oldValues ?? "{}",
+                newValues: newValues ?? "{}",
                 ipAddress: ipAddress
             );
         }

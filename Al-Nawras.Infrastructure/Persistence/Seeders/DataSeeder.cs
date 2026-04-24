@@ -15,7 +15,10 @@ namespace Al_Nawras.Infrastructure.Persistence.Seeders
     {
         public static async Task SeedAsync(AppDbContext context, ILogger logger)
         {
-            // Guard — never run twice
+            // Reporting templates should be seeded independently, even for existing databases.
+            await ReportTemplateSeeder.SeedAsync(context, logger);
+
+            // Guard — skip the legacy sample data if business data already exists
             if (await context.Clients.AnyAsync())
             {
                 logger.LogInformation("DataSeeder: data already exists, skipping.");

@@ -45,6 +45,23 @@ namespace Al_Nawras.Infrastructure.Services
             return relativePath;   // store relative — portable across environments
         }
 
+        public Task<Stream?> OpenReadAsync(
+            string storagePath,
+            CancellationToken cancellationToken = default)
+        {
+            var absolutePath = Path.Combine(_basePath, storagePath);
+            if (!File.Exists(absolutePath))
+                return Task.FromResult<Stream?>(null);
+
+            Stream stream = new FileStream(
+                absolutePath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read);
+
+            return Task.FromResult<Stream?>(stream);
+        }
+
         public void Delete(string storagePath)
         {
             var absolutePath = Path.Combine(_basePath, storagePath);
